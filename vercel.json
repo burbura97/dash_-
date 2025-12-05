@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "@vercel/node@2.0.0"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/auth-callback",
+      "destination": "/auth-callback.html"
+    }
+  ]
+}

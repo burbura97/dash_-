@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenith Dashboard</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .dashboard {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            opacity: 0.8;
+            font-size: 16px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-title {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            color: #10B981;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        /* Calendar */
+        .calendar-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px;
+            opacity: 0.8;
+        }
+
+        .calendar-day {
+            height: 60px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-day:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .calendar-day.current-month {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .calendar-day.selected {
+            background: rgba(16, 185, 129, 0.6);
+        }
+
+        .day-number {
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .day-events {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .day-event {
+            background: rgba(16, 185, 129, 0.7);
+            font-size: 8px;
+            padding: 1px 2px;
+            border-radius: 2px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* CRM Table */
+        .crm-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .crm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .crm-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .crm-table th,
+        .crm-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .crm-table th {
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .crm-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Sidebar Widgets */
+        .sidebar-widgets {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .widget {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .widget-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            background: #3B82F6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .activity-desc {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-action:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .action-icon {
+            width: 32px;
+            height: 32px;
+            background: #10B981;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-day {
+                height: 50px;
+            }
+        }
+
+        .mobile-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 200;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: block;
+            }
+        }
+
+        /* Event Popup */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .popup-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [currentDate, setCurrentDate] = useState(new Date());
+            const [selectedDate, setSelectedDate] = useState(null);
+            const [showPopup, setShowPopup] = useState(false);
+            const [popupEvents, setPopupEvents] = useState([]);
+
+            const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+
+            const events = {
+                '2024-12-05': [
+                    { title: 'Appointment with Shaurya', time: '10:00 AM' },
+                    { title: 'Team Meeting', time: '2:00 PM' }
+                ],
+                '2024-12-08': [
+                    { title: 'Client Presentation', time: '11:30 AM' }
+                ],
+                '2024-12-15': [
+                    { title: 'Project Review', time: '3:00 PM' }
+                ],
+                '2024-01-10': [
+                    { title: 'Strategy Meeting', time: '9:00 AM' }
+                ],
+                '2024-01-20': [
+                    { title: 'Product Demo', time: '1:00 PM' }
+                ]
+            };
+
+            const statsData = [
+                { title: 'Total Revenue', value: '$45,231', change: '+20.1%' },
+                { title: 'Active Users', value: '2,350', change: '+18.2%' },
+                { title: 'Orders', value: '1,234', change: '-2.3%' },
+                { title: 'Growth Rate', value: '12.5%', change: '+5.4%' }
+            ];
+
+            const crmData = [
+                { name: "John Smith", email: "john.smith@email.com", date: "2024-01-15", purpose: "Business Consultation", time: "10:00 AM" },
+                { name: "Sarah Johnson", email: "sarah.j@email.com", date: "2024-01-16", purpose: "Product Demo", time: "2:30 PM" },
+                { name: "Michael Brown", email: "m.brown@email.com", date: "2024-01-17", purpose: "Technical Support", time: "11:15 AM" },
+                { name: "Emily Davis", email: "emily.davis@email.com", date: "2024-01-18", purpose: "Sales Meeting", time: "3:45 PM" },
+                { name: "David Wilson", email: "david.wilson@email.com", date: "2024-01-19", purpose: "Project Review", time: "9:30 AM" }
+            ];
+
+            const generateCalendar = () => {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const startDate = new Date(firstDay);
+                startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+                const days = [];
+                for (let i = 0; i < 42; i++) {
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + i);
+                    days.push(date);
+                }
+                return days;
+            };
+
+            const handleDateClick = (date) => {
+                const dateKey = date.toISOString().split('T')[0];
+                const dayEvents = events[dateKey] || [];
+                
+                if (dayEvents.length > 0) {
+                    setPopupEvents(dayEvents);
+                    setShowPopup(true);
+                }
+                setSelectedDate(date);
+            };
+
+            const navigateMonth = (direction) => {
+                const newDate = new Date(currentDate);
+                newDate.setMonth(newDate.getMonth() + direction);
+                setCurrentDate(newDate);
+            };
+
+            const getEventsForDate = (date) => {
+                const dateKey = date.toISOString().split('T')[0];
+                return events[dateKey] || [];
+            };
+
+            const isToday = (date) => {
+                const today = new Date();
+                return date.toDateString() === today.toDateString();
+            };
+
+            const isCurrentMonth = (date) => {
+                return date.getMonth() === currentDate.getMonth();
+            };
+
+            const isSelected = (date) => {
+                return selectedDate && date.toDateString() === selectedDate.toDateString();
+            };
+
+            const days = generateCalendar();
+
+            return (
+                <div className="app">
+                    <button className="mobile-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                        ☰
+                    </button>
+
+                    <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+                        <div className="logo">Zenith</div>
+                        <a href="#" className="nav-item active">🏠 Dashboard</a>
+                        <a href="#" className="nav-item">📊 Analytics</a>
+                        <a href="#" className="nav-item">👥 Users</a>
+                        <a href="#" className="nav-item">🔔 Notifications</a>
+                        <a href="#" className="nav-item">⚙️ Settings</a>
+                    </div>
+
+                    <div className="main-content">
+                        <div className="dashboard">
+                            <div className="header">
+                                <h1 className="title">Welcome back!</h1>
+                                <p className="subtitle">Here's what's happening with your business today.</p>
+                            </div>
+
+                            <div className="stats-grid">
+                                {statsData.map((stat, i) => (
+                                    <div key={i} className="stat-card">
+                                        <div className="stat-title">{stat.title}</div>
+                                        <div className="stat-value">{stat.value}</div>
+                                        <div className="stat-change">{stat.change} from last month</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="content-grid">
+                                <div>
+                                    <div className="calendar-section">
+                                        <div className="calendar-header">
+                                            <div>
+                                                <h3>Calendar</h3>
+                                                <p style={{fontSize: '14px', opacity: '0.8'}}>Select date for appointments</p>
+                                            </div>
+                                            <div className="calendar-nav">
+                                                <button className="nav-btn" onClick={() => navigateMonth(-1)}>‹</button>
+                                                <span>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</span>
+                                                <button className="nav-btn" onClick={() => navigateMonth(1)}>›</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="calendar-grid">
+                                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                                <div key={day} className="day-header">{day}</div>
+                                            ))}
+                                            {days.map((date, i) => {
+                                                const dayEvents = getEventsForDate(date);
+                                                return (
+                                                    <div
+                                                        key={i}
+                                                        className={`calendar-day ${isCurrentMonth(date) ? 'current-month' : ''} ${isToday(date) ? 'today' : ''} ${isSelected(date) ? 'selected' : ''}`}
+                                                        onClick={() => handleDateClick(date)}
+                                                    >
+                                                        <div className="day-number">{date.getDate()}</div>
+                                                        <div className="day-events">
+                                                            {dayEvents.slice(0, 2).map((event, j) => (
+                                                                <div key={j} className="day-event">
+                                                                    {event.title.substring(0, 8)}...
+                                                                </div>
+                                                            ))}
+                                                            {dayEvents.length > 2 && (
+                                                                <div className="day-event" style={{background: '#F59E0B'}}>
+                                                                    +{dayEvents.length - 2}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <div className="crm-section">
+                                        <div className="crm-header">
+                                            <h3>Customer Appointments</h3>
+                                            <button style={{background: '#10B981', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer'}}>
+                                                + Add Appointment
+                                            </button>
+                                        </div>
+                                        <table className="crm-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Email</th>
+                                                    <th>Appointment On</th>
+                                                    <th>Appointment For</th>
+                                                    <th>Timing</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {crmData.map((row, i) => (
+                                                    <tr key={i}>
+                                                        <td style={{fontWeight: '600'}}>{row.name}</td>
+                                                        <td style={{fontFamily: 'monospace', fontSize: '12px'}}>{row.email}</td>
+                                                        <td style={{color: '#10B981'}}>{new Date(row.date).toLocaleDateString()}</td>
+                                                        <td>{row.purpose}</td>
+                                                        <td style={{color: '#F59E0B', fontWeight: '600'}}>{row.time}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div className="sidebar-widgets">
+                                    <div className="widget">
+                                        <div className="widget-title">Recent Activity</div>
+                                        <div className="activity-item">
+                                            <div className="activity-icon">👤</div>
+                                            <div className="activity-content">
+                                                <div className="activity-title">New user registered</div>
+                                                <div className="activity-desc">John Doe joined the platform</div>
+                                            </div>
+                                        </div>
+                                        <div className="activity-item">
+                                            <div className="activity-icon" style={{background: '#10B981'}}>🛍️</div>
+                                            <div className="activity-content">
+                                                <div className="activity-title">Order received</div>
+                                                <div className="activity-desc">Order #1234 for $299.99</div>
+                                            </div>
+                                        </div>
+                                        <div className="activity-item">
+                                            <div className="activity-icon" style={{background: '#F59E0B'}}>💰</div>
+                                            <div className="activity-content">
+                                                <div className="activity-title">Payment processed</div>
+                                                <div className="activity-desc">Invoice #INV-001 paid</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="widget">
+                                        <div className="widget-title">Quick Actions</div>
+                                        <div className="quick-action">
+                                            <div className="action-icon">➕</div>
+                                            <span>Add User</span>
+                                        </div>
+                                        <div className="quick-action">
+                                            <div className="action-icon" style={{background: '#10B981'}}>📄</div>
+                                            <span>New Report</span>
+                                        </div>
+                                        <div className="quick-action">
+                                            <div className="action-icon" style={{background: '#F59E0B'}}>📤</div>
+                                            <span>Send Invoice</span>
+                                        </div>
+                                        <div className="quick-action">
+                                            <div className="action-icon" style={{background: '#8B5CF6'}}>⬇️</div>
+                                            <span>Export Data</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {showPopup && (
+                        <div className="popup-overlay" onClick={() => setShowPopup(false)}>
+                            <div className="popup" onClick={e => e.stopPropagation()}>
+                                <div className="popup-header">
+                                    <h4>Events for {selectedDate?.toLocaleDateString()}</h4>
+                                    <button className="popup-close" onClick={() => setShowPopup(false)}>×</button>
+                                </div>
+                                {popupEvents.map((event, i) => (
+                                    <div key={i} className="event-item">
+                                        <div style={{fontWeight: '600'}}>{event.title}</div>
+                                        <div style={{color: '#F59E0B', fontSize: '14px'}}>{event.time}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

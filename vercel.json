@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "api/auth/google.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/calendar/events.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/auth-callback",
+      "destination": "/auth-callback.html"
+    }
+  ]
+}
